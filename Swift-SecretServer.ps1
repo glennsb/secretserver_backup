@@ -165,7 +165,12 @@ Function Backup-File {
             $headers = @{
                 "x-delete-at" = [int][double]::Parse($(Get-Date -date ([DateTime]::Now.AddDays(31)).ToUniversalTime()-uformat %s))
             }
-            $r = Invoke-WebRequest -UseBasicParsing -Headers $headers -Uri $uri.Location -Method Put -InFile $file -ErrorAction Stop
+            try {
+              $r = Invoke-WebRequest -UseBasicParsing -Headers $headers -Uri $uri.Location -Method Put -InFile $file -ErrorAction Stop
+            } catch {
+              $r = $_.Exception.Response
+              Write-Warning "Error putting to TempURL: $($r.StatusCode.value__) - $($r.StatusDescription)"
+            }
             Write-Output $r.StatusCode
             if (201 -eq $r.StatusCode) {
                 Remove-Item $file
