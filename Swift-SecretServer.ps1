@@ -150,6 +150,7 @@ Function Backup-File {
     )
     Begin {
         $num_done = 0
+        $prefix = $((Get-Date).ToString("yyyyMMdd"))
     }
     Process {
         if ($PSCmdlet.ParameterSetName -eq 'Path') {
@@ -160,7 +161,7 @@ Function Backup-File {
      
         Write-Output "Backing up $($file.Name)"
 
-        $uri = Request-TempUrl -Account $Account -Container $Container -Object $file.Name -Method Put -ApiKey $api_key -ApiSecret $api_secret
+        $uri = Request-TempUrl -Account $Account -Container $Container -Object $($prefix + "/" + $file.Name) -Method Put -ApiKey $api_key -ApiSecret $api_secret
         if (201 -eq $uri.Status) {
             $headers = @{
                 "x-delete-at" = [int][double]::Parse($(Get-Date -date ([DateTime]::Now.AddDays(31)).ToUniversalTime()-uformat %s))
